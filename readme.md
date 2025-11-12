@@ -1,6 +1,5 @@
 # 🎨 Auto-Miglioramento Immagini
-Uno script Python interattivo che ottimizza automaticamente foto singole o intere cartelle di immagini, regolando **bilanciamento del bianco**, **luminosità**, **contrasto** e **saturazione** in modo intelligente e non distruttivo.  
-Sviluppato da **Matteo Filippini**.
+Uno script Python interattivo che ottimizza automaticamente foto singole o intere cartelle di immagini, regolando **bilanciamento del bianco**, **luminosità**, **contrasto** e **saturazione** in modo intelligente e non distruttivo.
 
 ---
 
@@ -74,4 +73,5 @@ Le immagini sono a colori o in bianco e nero? c
 📸 Trovate 27 immagini da elaborare.
 Elaborazione: 100%|█████████████████████████████| 27/27
 ✅ Tutte le immagini sono state elaborate con successo!
+
 ```
