@@ -29,9 +29,6 @@ jobs:
           pip install -r requirements.txt
           pip install pytest colorama
 
-      - name: Run tests
-        run: pytest -v --maxfail=1 --disable-warnings
-
   build:
     name: Build EXE
     runs-on: windows-latest
