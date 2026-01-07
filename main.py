@@ -4,10 +4,39 @@ from tqdm import tqdm
 import numpy as np
 
 # ==================================================
+# FUNZIONE DI CONVERSIONE DA COLORE A B&W
+# ==================================================
+def convert_bw(img, mode):
+    # Conversione base in luminanza
+    gray = img.convert("L")
+    np_img = np.array(gray).astype(np.float32)
+
+    if mode == 1:
+        # Range naturale (solo normalizzazione soft)
+        min_l, max_l = np.min(np_img), np.max(np_img)
+        if max_l > min_l:
+            np_img = (np_img - min_l) / (max_l - min_l) * 255
+
+    elif mode == 2:
+        # Nero e bianco forzati
+        min_l, max_l = np.min(np_img), np.max(np_img)
+        np_img = (np_img - min_l) / max(max_l - min_l, 1) * 255
+
+    elif mode == 3:
+        # Percentili 10% - 90%
+        low = np.percentile(np_img, 10)
+        high = np.percentile(np_img, 90)
+        np_img = (np_img - low) / max(high - low, 1) * 255
+
+    np_img = np.clip(np_img, 0, 255).astype(np.uint8)
+    return Image.fromarray(np_img)
+
+# ==================================================
 # FUNZIONE PRINCIPALE DI MIGLIORAMENTO (NON TOCCATA)
 # ==================================================
 def auto_migliora(img_path, out_path, tipo_foto,
-                  do_brightness, do_contrast, do_saturation, do_whitebalance):
+                  do_brightness, do_contrast, do_saturation, do_whitebalance,
+                  do_bw=False, bw_mode=1):
     img = Image.open(img_path)
 
     # --- Conversione di sicurezza ---
@@ -23,6 +52,10 @@ def auto_migliora(img_path, out_path, tipo_foto,
         np_img *= scale
         np_img = np.clip(np_img, 0, 255).astype(np.uint8)
         img = Image.fromarray(np_img)
+
+    # 🔲 Conversione Bianco e Nero
+    if do_bw:
+        img = convert_bw(img, bw_mode)
 
     # 2️⃣ Regolazione della luminosità
     if do_brightness:
@@ -93,10 +126,20 @@ def main():
     print("\n🔧 Scegli quali correzioni applicare (rispondi 's' o 'n'):\n")
     print("💡 Suggerimento: l’ordine ottimale è già gestito automaticamente!")
 
-    do_whitebalance = input("   ➤ Bilanciare il bianco (corregge dominanti di colore)? [s/n]: ").strip().lower() == "s"
-    do_brightness    = input("   ➤ Regolare la luminosità (ottimizza la chiarezza)? [s/n]: ").strip().lower() == "s"
-    do_contrast      = input("   ➤ Regolare il contrasto (più profondità e definizione)? [s/n]: ").strip().lower() == "s"
-    do_saturation    = input("   ➤ Regolare la saturazione (solo per immagini a colori)? [s/n]: ").strip().lower() == "s"
+    do_whitebalance = input("   ➤ Bilanciare il bianco? [s/n]: ").strip().lower() == "s"
+    do_brightness    = input("   ➤ Regolare la luminosità? [s/n]: ").strip().lower() == "s"
+    do_contrast      = input("   ➤ Regolare il contrasto? [s/n]: ").strip().lower() == "s"
+    do_saturation    = input("   ➤ Regolare la saturazione? [s/n]: ").strip().lower() == "s"
+  
+    do_bw = input("\n🔲 Convertire le immagini in Bianco e Nero? [s/n]: ").strip().lower() == "s"
+
+    bw_mode = 1
+    if do_bw:
+        print("\n🖤 Scegli il tipo di Bianco e Nero:")
+        print("   1️⃣ Naturale (range reale della foto)")
+        print("   2️⃣ Contrastato (nero e bianco perfetti)")
+        print("   3️⃣ Intelligente (10% - 90%)")
+        bw_mode = int(input("   Selezione [1/2/3]: ").strip())
 
     # --- Selezione file ---
     files = [f for f in os.listdir(folder_src)
@@ -115,7 +158,8 @@ def main():
         name, ext = os.path.splitext(f)
         out_file = os.path.join(folder_dst, f"{name} - edit{ext}")
         auto_migliora(in_file, out_file, tipo_foto,
-                      do_brightness, do_contrast, do_saturation, do_whitebalance)
+            do_brightness, do_contrast, do_saturation, do_whitebalance,
+            do_bw, bw_mode)
 
     print("\n✅ Tutte le immagini sono state elaborate con successo!")
     print(f"📁 I file corretti si trovano in: {folder_dst}")
@@ -124,3 +168,4 @@ def main():
 # ==================================================
 if __name__ == "__main__":
     main()
+
